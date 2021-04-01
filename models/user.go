@@ -15,6 +15,12 @@ type Polls struct {
 type Options struct {
 	Id     uint   `json:"id"`
 	Option string `json:"option"`
-	PollId uint   `json:"pollid"`
+	PollId uint   `json:"pollId"`
 	Votes  int    `gorm:"default:0"`
+}
+
+type OptionUser struct {
+    Id     uint   `json:"id"`
+	OptionId int `json:"optionId"`
+	UserId int   `json:"userId"`
 }

@@ -77,7 +77,7 @@ func Login(c *gin.Context) {
 
 	c.Cookie(cookie)
 
-	c.JSON(200, gin.H{"token": token}) // TODO: pass
+	c.JSON(200, gin.H{"msg": "Successfully logged"}) // TODO: pass
 }
 
 func User(c *gin.Context) {
@@ -111,7 +111,7 @@ func Logout(c *gin.Context) {
 		true,
 	)
 	c.Cookie(cookie)
-	c.JSON(200, gin.H{"message": "Logout Succcess ful"})
+	c.JSON(200, gin.H{"message": "Logout Succcessfully"})
 }
 
 func CreatePoll(c *gin.Context) {
@@ -135,7 +135,7 @@ func CreatePoll(c *gin.Context) {
 
 		database.DB.Create(&saveOption)
 	}
-	c.JSON(200, gin.H{"msg": "success fully added"})
+	c.JSON(200, gin.H{"msg": "Successfully added"})
 }
 
 func GetAllPolls(c *gin.Context) {
@@ -147,14 +147,10 @@ func GetAllPolls(c *gin.Context) {
 	for _, val := range polls {
 		options := []models.Options{}
 		database.DB.Where("poll_id=?", val.Id).Find(&options)
-		var allOptions []string
-		for _, option := range options {
-			allOptions = append(allOptions, option.Option)
-		}
 		question := dto.Questions{
 			Id:       int(val.Id),
 			Question: val.Question,
-			Options:  allOptions,
+			Options:  options,
 		}
 
 		allQuestions = append(allQuestions, question)
@@ -171,19 +167,57 @@ func GetPollById(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
 		return
 	}
-	//var allQuestions = []dto.Questions{}
 	options := []models.Options{}
 	database.DB.Where("poll_id=?", poll.Id).Find(&options)
-	var allOptions []string
-	for _, option := range options {
-		allOptions = append(allOptions, option.Option)
-	}
 	question := dto.Questions{
 		Id:       int(poll.Id),
 		Question: poll.Question,
-		Options:  allOptions,
+		Options:  options,
 	}
 
 	c.JSON(200, gin.H{"poll: ": &question})
 
+}
+
+func UpdateOptionVote(c *gin.Context) {
+	var option models.Options
+	if err := database.DB.Where("id = ?", c.Param("id")).First(&option).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
+		return
+	}
+	newVote := option.Votes + 1
+	database.DB.Model(&option).Update("Votes",newVote)
+	c.JSON(200, gin.H{"option: ": &option})
+}
+
+func SaveOptionIdUserId(c *gin.Context){
+	var data dao.OptionIdUserId
+	if err := c.ShouldBindJSON(&data); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+	saveData := models.OptionUser{
+		OptionId: data.OptionId,
+		UserId: data.UserId,
+	}
+
+	database.DB.Create(&saveData)
+	c.JSON(200, gin.H{"msg": "Successfully saved"})
+}
+
+func GetUserListOfOption(c *gin.Context){
+	var option []models.OptionUser
+	database.DB.Where("option_id = ?", c.Param("id")).Find(&option)
+	if len(option) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
+		return
+	}
+	var userName []string
+	for _, id := range option {
+		var user models.User
+		database.DB.Where("id=?", id.UserId).First(&user)
+		userName = append(userName, user.Name)
+	}
+
+	c.JSON(200, gin.H{"users": &userName})
 }
