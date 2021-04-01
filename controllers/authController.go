@@ -93,7 +93,6 @@ func User(c *gin.Context) {
 	}
 
 	claims := token.Claims.(*jwt.StandardClaims)
-
 	var user models.User
 	database.DB.Where("id=?", claims.Issuer).First(&user)
 	c.JSON(200, gin.H{"user": user})
