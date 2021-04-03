@@ -3,7 +3,6 @@ package controllers
 import (
 	"Project/dao"
 	"Project/database"
-	"Project/dto"
 	"Project/models"
 	"net/http"
 
@@ -139,41 +138,33 @@ func CreatePoll(c *gin.Context) {
 
 func GetAllPolls(c *gin.Context) {
 
-	polls := []models.Polls{}
-	database.DB.Find(&polls)
-	var allQuestions = []dto.Questions{}
+	questions := []models.Polls{}
+	database.DB.Find(&questions) // Fetched the poll ques
+	// var allQuestions = []dto.Questions{}
 
-	for _, val := range polls {
-		options := []models.Options{}
-		database.DB.Where("poll_id=?", val.Id).Find(&options)
-		question := dto.Questions{
-			Id:       int(val.Id),
-			Question: val.Question,
-			Options:  options,
-		}
+	// for _, val := range polls {
+	// 	options := []models.Options{}
+	// 	database.DB.Where("poll_id=?", val.Id).Find(&options) // Fetched all Options
+	// 	question := dto.Questions{
+	// 		Id:       int(val.Id),
+	// 		Question: val.Question,
+	// 		Options:  options,
+	// 	}
 
-		allQuestions = append(allQuestions, question)
-	}
+	// 	allQuestions = append(allQuestions, question)
+	// }
 
-	c.JSON(200, gin.H{"questions": &allQuestions})
+	c.JSON(200, gin.H{"questions": &questions})
 }
 
 func GetPollById(c *gin.Context) {
 
-	var poll models.Polls
+	var question models.Polls
 
-	if err := database.DB.Where("id = ?", c.Param("id")).First(&poll).Error; err != nil {
+	if err := database.DB.Where("id = ?", c.Param("id")).First(&question).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
 		return
 	}
-	options := []models.Options{}
-	database.DB.Where("poll_id=?", poll.Id).Find(&options)
-	question := dto.Questions{
-		Id:       int(poll.Id),
-		Question: poll.Question,
-		Options:  options,
-	}
-
 	c.JSON(200, gin.H{"poll: ": &question})
 
 }
@@ -186,7 +177,7 @@ func UpdateOptionVote(c *gin.Context) {
 	}
 	newVote := option.Votes + 1
 	database.DB.Model(&option).Update("Votes",newVote)
-	c.JSON(200, gin.H{"option: ": &option})
+	c.JSON(200, gin.H{"option": &option})
 }
 
 func SaveOptionIdUserId(c *gin.Context){
@@ -219,4 +210,10 @@ func GetUserListOfOption(c *gin.Context){
 	}
 
 	c.JSON(200, gin.H{"users": &userName})
+}
+
+func GetOptionsByQuesId(c *gin.Context){
+	options := []models.Options{}
+	database.DB.Where("poll_id=?", c.Param("id")).Find(&options)
+	c.JSON(200, gin.H{"options": &options})
 }
