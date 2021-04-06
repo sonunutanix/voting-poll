@@ -140,19 +140,6 @@ func GetAllPolls(c *gin.Context) {
 
 	questions := []models.Polls{}
 	database.DB.Find(&questions) // Fetched the poll ques
-	// var allQuestions = []dto.Questions{}
-
-	// for _, val := range polls {
-	// 	options := []models.Options{}
-	// 	database.DB.Where("poll_id=?", val.Id).Find(&options) // Fetched all Options
-	// 	question := dto.Questions{
-	// 		Id:       int(val.Id),
-	// 		Question: val.Question,
-	// 		Options:  options,
-	// 	}
-
-	// 	allQuestions = append(allQuestions, question)
-	// }
 
 	c.JSON(200, gin.H{"questions": &questions})
 }
@@ -216,4 +203,27 @@ func GetOptionsByQuesId(c *gin.Context){
 	options := []models.Options{}
 	database.DB.Where("poll_id=?", c.Param("id")).Find(&options)
 	c.JSON(200, gin.H{"options": &options})
+}
+
+func SaveQuestionIdUserId(c *gin.Context){
+	var data dao.QuestionIdUserId
+	if err := c.ShouldBindJSON(&data); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	var userVoteQues models.UserVoteQues
+	database.DB.Where("question_id = ? AND user_id=?", data.QuestionId, data.UserId).First(&userVoteQues)
+	if userVoteQues.Id != 0 {
+		c.JSON(200, gin.H{"msg": "Already voted"})
+		return
+	}
+
+	saveData := models.UserVoteQues{
+		QuestionId: data.QuestionId,
+		UserId: data.UserId,
+	}
+
+	database.DB.Create(&saveData)
+	c.JSON(200, gin.H{"msg": "Successfully saved"})
 }

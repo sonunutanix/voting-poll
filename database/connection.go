@@ -19,4 +19,5 @@ func Connect() {
 	connection.AutoMigrate(&models.Options{})
 	connection.AutoMigrate(&models.Polls{})
 	connection.AutoMigrate(&models.OptionUser{})
+	connection.AutoMigrate(&models.UserVoteQues{})
 }

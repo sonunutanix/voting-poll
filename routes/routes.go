@@ -18,4 +18,5 @@ func Setup(app *gin.Engine) {
 	app.POST("/api/option-user", controllers.SaveOptionIdUserId) // save userId who vote for the option
 	app.GET("api/option-user/:id", controllers.GetUserListOfOption) //Get all user who vote for a option
 	app.GET("api/options/:id", controllers.GetOptionsByQuesId) // Get Options By question Id
+	app.POST("/api/question-user", controllers.SaveQuestionIdUserId) // Save User, vote for the question
 }

@@ -24,3 +24,9 @@ type OptionUser struct {
 	OptionId int `json:"optionId"`
 	UserId int   `json:"userId"`
 }
+
+type UserVoteQues struct {
+	Id     uint   `json:"id"`
+	QuestionId int `json:"questionId"`
+	UserId int   `json:"userId"`
+}
