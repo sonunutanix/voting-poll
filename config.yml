@@ -1,0 +1,4 @@
+development:
+  database: polls
+  username: root
+  password: root1234

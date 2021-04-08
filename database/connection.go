@@ -9,8 +9,9 @@ import (
 
 var DB *gorm.DB
 
-func Connect() {
-	connection, err := gorm.Open(mysql.Open("root:root1234@/polls"), &gorm.Config{})
+func Connect(username, password, dbname string) {
+	dbvalue := username+":"+password+"@/"+dbname
+	connection, err := gorm.Open(mysql.Open(dbvalue), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
 	}
